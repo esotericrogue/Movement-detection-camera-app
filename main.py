@@ -3,6 +3,8 @@ import time
 from datetime import datetime
 from emailing import send_email
 import glob
+import os
+from threading import Thread
 
 video = cv2.VideoCapture(0)
 time.sleep(1)
@@ -10,6 +12,13 @@ time.sleep(1)
 first_frame = None
 status_list = []
 count= 1
+
+
+def clean_folder():
+    images = glob.glob("images/*.png")
+    for image in images:
+        os.remove(image)
+
 
 while True:
     now = str(datetime.now().strftime("%A %d/%m/%y %H:%M:%S"))
@@ -30,7 +39,7 @@ while True:
 
     thresh_frame = cv2.threshold(delta_frame, 60,255, cv2.THRESH_BINARY)[1]
     dil_frame = cv2.dilate(thresh_frame, None, iterations=2)
-    cv2.imshow("My video", thresh_frame)
+    cv2.imshow("My video", dil_frame)
 
     contours, check = cv2.findContours(dil_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -51,12 +60,20 @@ while True:
     status_list = status_list[-2:]
 
     if status_list[0] == 1 and status_list[1] == 0:
-        send_email()
+        email_thread = Thread(target=send_email, args=(image_with_object, ))
+        email_thread.daemon = True
+        clean_thread = Thread(target=clean_folder)
+        clean_thread.daemon = True
 
-    cv2.imshow("video", frame)
+        email_thread.start()
+
+    print(status_list)
+    cv2.imshow("Video", frame)
     key = cv2.waitKey(1)
 
     if key == ord("q"):
         break
 
 video.release()
+
+clean_thread.start()

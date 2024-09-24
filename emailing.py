@@ -5,6 +5,8 @@ from email.message import EmailMessage
 password = "akxq zyuz grzj qbvv"
 SENDER = "andreigrig123@gmail.com"
 RECEIVER = "andreigrig123@gmail.com"
+
+
 def send_email(image_path):
     email_message = EmailMessage()
     email_message["Subject"] = "Foreign entity detected!"
@@ -23,4 +25,4 @@ def send_email(image_path):
 
 
 if __name__ == "__main__":
-    send_email("images/19.png")
+    send_email("images/*.png")
